@@ -211,8 +211,7 @@ namespace Xamarin.Controls
 				return null;
 			}
 
-			var size = new SizeF (Width, Height);
-			var image = Bitmap.CreateBitmap ((int)size.Width, (int)size.Height, Bitmap.Config.Argb8888);
+			var image = Bitmap.CreateBitmap (Width, Height, Bitmap.Config.Argb8888);
 
 			using (var canvas = new Canvas (image))
 			using (var paint = new Paint ())
