@@ -46,36 +46,87 @@ namespace Xamarin.Controls
 
 		public bool IsBlank => inkPresenter == null ? true : inkPresenter.GetStrokes ().Count == 0;
 
-		public NativePoint[] Points
+		public Signature GetSignature ()
 		{
-			get
+			if (inkPresenter.StrokesRecordedAt == null)
 			{
-				if (IsBlank)
-				{
-					return new NativePoint[0];
-				}
-
-				// make a deep copy, with { 0, 0 } line starter
-				return inkPresenter.GetStrokes ()
-					.SelectMany (s => new[] { new NativePoint (0, 0) }.Concat (s.GetPoints ()))
-					.Skip (1) // skip the first empty
-					.ToArray ();
+				return null;
 			}
+
+			var features = Signature.SignatureFeatures.None;
+			var points = inkPresenter.GetStrokes ().SelectMany (stroke => stroke.GetPoints ()).ToList ();
+			if (points.Min (point => point.Pressure) != points.Max (point => point.Pressure))
+			{
+				features |= Signature.SignatureFeatures.Pressure;
+			}
+			if (points.Min (point => point.TiltOrieantation?.X ?? 0) != points.Max (point => point.TiltOrieantation?.X))
+			{
+				features |= Signature.SignatureFeatures.TiltOrientationX;
+			}
+			if (points.Min (point => point.TiltOrieantation?.Y ?? 0) != points.Max (point => point.TiltOrieantation?.Y))
+			{
+				features |= Signature.SignatureFeatures.TiltOrientationY;
+			}
+
+			var signature = new Signature (
+				features,
+#if __ANDROID__
+				new Signature.SignatureFrame (Width, Height),
+#elif __IOS__
+				new Signature.SignatureFrame ((float)Frame.Width, (float)Frame.Height),
+#endif
+				inkPresenter.GetStrokes ()
+					?.Select (stroke =>
+						{
+							var tsOrigin = stroke.GetPoints ().Count > 0 ? stroke.GetPoints ()[0].Timestamp : TimeSpan.Zero;
+							return stroke.GetPoints ()
+								.Select (inkPoint => new Signature.SignaturePoint (
+#if WINDOWS_PHONE_APP
+									new Signature.SignaturePointPosition(inkPoint.Position.X, inkPoint.Position.Y),
+#else
+									new Signature.SignaturePointPosition ((float)inkPoint.Position.X, (float)inkPoint.Position.Y),
+#endif
+									inkPoint.Pressure,
+									inkPoint.TiltOrieantation != null ? new Signature.SignatureTiltOrieantation (inkPoint.TiltOrieantation.X, inkPoint.TiltOrieantation.Y) : null,
+									inkPoint.Timestamp - tsOrigin))
+								.ToList();
+						})
+					.ToList (),
+				inkPresenter.StrokesRecordedAt.Value);
+
+			return signature;
 		}
 
-		public NativePoint[][] Strokes
-		{
-			get
-			{
-				if (IsBlank)
-				{
-					return new NativePoint[0][];
-				}
+		//public InkPoint[] Points
+		//{
+		//	get
+		//	{
+		//		if (IsBlank)
+		//		{
+		//			return new NativePoint[0];
+		//		}
 
-				// make a deep copy
-				return inkPresenter.GetStrokes ().Select (s => s.GetPoints ().ToArray ()).ToArray ();
-			}
-		}
+		//		// make a deep copy, with { 0, 0 } line starter
+		//		return inkPresenter.GetStrokes ()
+		//			.SelectMany (s => new[] { new NativePoint (0, 0) }.Concat (s.GetPoints ()))
+		//			.Skip (1) // skip the first empty
+		//			.ToArray ();
+		//	}
+		//}
+
+		//public NativePoint[][] Strokes
+		//{
+		//	get
+		//	{
+		//		if (IsBlank)
+		//		{
+		//			return new NativePoint[0][];
+		//		}
+
+		//		// make a deep copy
+		//		return inkPresenter.GetStrokes ().Select (s => s.GetPoints ().ToArray ()).ToArray ();
+		//	}
+		//}
 
 		public NativeRect GetSignatureBounds (float padding = 5f)
 		{
@@ -88,10 +139,10 @@ namespace Xamarin.Controls
 			double xMin = size.Width, xMax = 0, yMin = size.Height, yMax = 0;
 			foreach (var point in inkPresenter.GetStrokes ().SelectMany (stroke => stroke.GetPoints ()))
 			{
-				xMin = point.X <= 0 ? 0 : Math.Min (xMin, point.X);
-				yMin = point.Y <= 0 ? 0 : Math.Min (yMin, point.Y);
-				xMax = point.X >= size.Width ? size.Width : Math.Max (xMax, point.X);
-				yMax = point.Y >= size.Height ? size.Height : Math.Max (yMax, point.Y);
+				xMin = point.Position.X <= 0 ? 0 : Math.Min (xMin, point.Position.X);
+				yMin = point.Position.Y <= 0 ? 0 : Math.Min (yMin, point.Position.Y);
+				xMax = point.Position.X >= size.Width ? size.Width : Math.Max (xMax, point.Position.X);
+				yMax = point.Position.Y >= size.Height ? size.Height : Math.Max (yMax, point.Position.Y);
 			}
 
 			var spacing = (StrokeWidth / 2f) + padding;
@@ -436,81 +487,81 @@ namespace Xamarin.Controls
 			return true;
 		}
 
-		public void LoadStrokes (NativePoint[][] loadedStrokes)
-		{
-			// clear any existing paths or points.
-			Clear ();
+		//public void LoadStrokes (NativePoint[][] loadedStrokes)
+		//{
+		//	// clear any existing paths or points.
+		//	Clear ();
 
-			// there is nothing
-			if (loadedStrokes == null || loadedStrokes.Length == 0)
-			{
-				return;
-			}
+		//	// there is nothing
+		//	if (loadedStrokes == null || loadedStrokes.Length == 0)
+		//	{
+		//		return;
+		//	}
 
-			inkPresenter.AddStrokes (loadedStrokes, StrokeColor, (float)StrokeWidth);
+		//	inkPresenter.AddStrokes (loadedStrokes, StrokeColor, (float)StrokeWidth);
 
-			if (!IsBlank)
-			{
-				OnStrokeCompleted ();
-			}
-		}
+		//	if (!IsBlank)
+		//	{
+		//		OnStrokeCompleted ();
+		//	}
+		//}
 
-		/// <summary>
-		/// Allow the user to import an array of points to be used to draw a signature in the view, with new
-		/// lines indicated by a { 0, 0 } point in the array.
-		/// <param name="loadedPoints"></param>
-		public void LoadPoints (NativePoint[] loadedPoints)
-		{
-			// clear any existing paths or points.
-			Clear ();
+		///// <summary>
+		///// Allow the user to import an array of points to be used to draw a signature in the view, with new
+		///// lines indicated by a { 0, 0 } point in the array.
+		///// <param name="loadedPoints"></param>
+		//public void LoadPoints (NativePoint[] loadedPoints)
+		//{
+		//	// clear any existing paths or points.
+		//	Clear ();
 
-			// there is nothing
-			if (loadedPoints == null || loadedPoints.Length == 0)
-			{
-				return;
-			}
+		//	// there is nothing
+		//	if (loadedPoints == null || loadedPoints.Length == 0)
+		//	{
+		//		return;
+		//	}
 
-			var startIndex = 0;
+		//	var startIndex = 0;
 
-			var emptyIndex = Array.IndexOf (loadedPoints, new NativePoint (0, 0));
-			if (emptyIndex == -1)
-			{
-				emptyIndex = loadedPoints.Length;
-			}
+		//	var emptyIndex = Array.IndexOf (loadedPoints, new NativePoint (0, 0));
+		//	if (emptyIndex == -1)
+		//	{
+		//		emptyIndex = loadedPoints.Length;
+		//	}
 
-			var strokes = new List<NativePoint[]> ();
+		//	var strokes = new List<NativePoint[]> ();
 
-			do
-			{
-				// add a stroke to the ink presenter
-				var currentStroke = new NativePoint[emptyIndex - startIndex];
-				strokes.Add (currentStroke);
-				Array.Copy (loadedPoints, startIndex, currentStroke, 0, currentStroke.Length);
+		//	do
+		//	{
+		//		// add a stroke to the ink presenter
+		//		var currentStroke = new NativePoint[emptyIndex - startIndex];
+		//		strokes.Add (currentStroke);
+		//		Array.Copy (loadedPoints, startIndex, currentStroke, 0, currentStroke.Length);
 
-				// obtain the indices for the next line to be drawn.
-				startIndex = emptyIndex + 1;
-				if (startIndex < loadedPoints.Length - 1)
-				{
-					emptyIndex = Array.IndexOf (loadedPoints, new NativePoint (0, 0), startIndex);
-					if (emptyIndex == -1)
-					{
-						emptyIndex = loadedPoints.Length;
-					}
-				}
-				else
-				{
-					emptyIndex = startIndex;
-				}
-			}
-			while (startIndex < emptyIndex);
+		//		// obtain the indices for the next line to be drawn.
+		//		startIndex = emptyIndex + 1;
+		//		if (startIndex < loadedPoints.Length - 1)
+		//		{
+		//			emptyIndex = Array.IndexOf (loadedPoints, new NativePoint (0, 0), startIndex);
+		//			if (emptyIndex == -1)
+		//			{
+		//				emptyIndex = loadedPoints.Length;
+		//			}
+		//		}
+		//		else
+		//		{
+		//			emptyIndex = startIndex;
+		//		}
+		//	}
+		//	while (startIndex < emptyIndex);
 
-			inkPresenter.AddStrokes (strokes, StrokeColor, (float)StrokeWidth);
+		//	inkPresenter.AddStrokes (strokes, StrokeColor, (float)StrokeWidth);
 
-			if (!IsBlank)
-			{
-				OnStrokeCompleted ();
-			}
-		}
+		//	if (!IsBlank)
+		//	{
+		//		OnStrokeCompleted ();
+		//	}
+		//}
 
 		private void OnCleared ()
 		{

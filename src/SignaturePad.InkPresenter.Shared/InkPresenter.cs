@@ -50,6 +50,8 @@ namespace Xamarin.Controls
 
 		public float StrokeWidth { get; set; } = 1f;
 
+		public DateTime? StrokesRecordedAt { get; private set; }
+
 		// private properties
 
 #if __IOS__
@@ -107,60 +109,60 @@ namespace Xamarin.Controls
 			this.Invalidate ();
 		}
 
-		public void AddStroke (NativePoint[] strokePoints, NativeColor color, float width)
-		{
-			if (AddStrokeInternal (strokePoints, color, width))
-			{
-				this.Invalidate ();
-			}
-		}
+		//public void AddStroke (NativePoint[] strokePoints, NativeColor color, float width)
+		//{
+		//	if (AddStrokeInternal (strokePoints, color, width))
+		//	{
+		//		this.Invalidate ();
+		//	}
+		//}
 
-		public void AddStrokes (IEnumerable<NativePoint[]> strokes, NativeColor color, float width)
-		{
-			var changed = false;
+		//public void AddStrokes (IEnumerable<NativePoint[]> strokes, NativeColor color, float width)
+		//{
+		//	var changed = false;
 
-			foreach (var stroke in strokes)
-			{
-				if (AddStrokeInternal (stroke, color, width))
-				{
-					changed = true;
-				}
-			}
+		//	foreach (var stroke in strokes)
+		//	{
+		//		if (AddStrokeInternal (stroke, color, width))
+		//		{
+		//			changed = true;
+		//		}
+		//	}
 
-			if (changed)
-			{
-				this.Invalidate ();
-			}
-		}
+		//	if (changed)
+		//	{
+		//		this.Invalidate ();
+		//	}
+		//}
 
-		private bool AddStrokeInternal (IEnumerable<NativePoint> points, NativeColor color, float width)
-		{
-			var strokePoints = points?.ToList ();
+		//private bool AddStrokeInternal (IEnumerable<NativePoint> points, NativeColor color, float width)
+		//{
+		//	var strokePoints = points?.ToList ();
 
-			if (strokePoints == null || strokePoints.Count == 0)
-			{
-				return false;
-			}
+		//	if (strokePoints == null || strokePoints.Count == 0)
+		//	{
+		//		return false;
+		//	}
 
-			var newpath = new NativePath ();
-			newpath.MoveTo (strokePoints[0].X, strokePoints[0].Y);
-			foreach (var point in strokePoints.Skip (1))
-			{
-				newpath.LineTo (point.X, point.Y);
-			}
+		//	var newpath = new NativePath ();
+		//	newpath.MoveTo (strokePoints[0].X, strokePoints[0].Y);
+		//	foreach (var point in strokePoints.Skip (1))
+		//	{
+		//		newpath.LineTo (point.X, point.Y);
+		//	}
 
-			paths.Add (new InkStroke (newpath, strokePoints, color, width));
+		//	paths.Add (new InkStroke (newpath, strokePoints, color, width));
 
-			return true;
-		}
+		//	return true;
+		//}
 
 		// private methods
 
 		private bool HasMovedFarEnough (InkStroke stroke, double touchX, double touchY)
 		{
 			var lastPoint = stroke.GetPoints ().LastOrDefault ();
-			var deltaX = touchX - lastPoint.X;
-			var deltaY = touchY - lastPoint.Y;
+			var deltaX = touchX - lastPoint.Position.X;
+			var deltaY = touchY - lastPoint.Position.Y;
 
 			var distance = Math.Sqrt (Math.Pow (deltaX, 2) + Math.Pow (deltaY, 2));
 			return distance >= MinimumPointDistance;

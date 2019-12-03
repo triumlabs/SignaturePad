@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CoreGraphics;
 using Foundation;
 using UIKit;
@@ -35,8 +36,13 @@ namespace Xamarin.Controls
 
 		public override void TouchesBegan (NSSet touches, UIEvent evt)
 		{
+			if (paths.Count == 0)
+			{
+				StrokesRecordedAt = DateTime.UtcNow;
+			}
+
 			// create a new path and set the options
-			currentPath = new InkStroke (UIBezierPath.Create (), new List<CGPoint> (), StrokeColor, StrokeWidth);
+			currentPath = new InkStroke (UIBezierPath.Create (), new List<InkPoint> (), StrokeColor, StrokeWidth);
 
 			// obtain the location of the touch
 			var touch = touches.AnyObject as UITouch;
@@ -44,7 +50,11 @@ namespace Xamarin.Controls
 
 			// move the path to that position
 			currentPath.Path.MoveTo (touchLocation);
-			currentPath.GetPoints ().Add (touchLocation);
+			currentPath.GetPoints ().Add (new InkPoint (
+				touchLocation,
+				(float)touch.Force,
+				null,
+				TimeSpan.FromSeconds (touch.Timestamp)));
 
 			// update the dirty rectangle
 			ResetBounds (touchLocation);
@@ -60,17 +70,29 @@ namespace Xamarin.Controls
 
 			// obtain the location of the touch
 			var touch = touches.AnyObject as UITouch;
-			var touchLocation = touch.LocationInView (this);
 
-			if (HasMovedFarEnough (currentPath, touchLocation.X, touchLocation.Y))
+			// Coalesced touches contains the current touch too!
+			var coTouches = evt.GetCoalescedTouches (touch);
+			foreach (var coTouch in coTouches)
 			{
-				// add it to the current path
-				currentPath.Path.AddLineTo (touchLocation);
-				currentPath.GetPoints ().Add (touchLocation);
+				var coTouchLocation = coTouch.LocationInView (this);
 
-				// update the dirty rectangle
-				UpdateBounds (touchLocation);
-				SetNeedsDisplayInRect (DirtyRect);
+				if (HasMovedFarEnough (currentPath, coTouchLocation.X, coTouchLocation.Y))
+				{
+					// add it to the current path
+					currentPath.Path.AddLineTo (coTouchLocation);
+					//currentPath.GetPoints ().Add (touchLocation);
+
+					// update the dirty rectangle
+					UpdateBounds (coTouchLocation);
+					SetNeedsDisplayInRect (DirtyRect);
+				}
+
+				currentPath.GetPoints ().Add (new InkPoint (
+					coTouchLocation,
+					(float)coTouch.Force,
+					null,
+					TimeSpan.FromSeconds (coTouch.Timestamp)));
 			}
 		}
 
@@ -92,12 +114,17 @@ namespace Xamarin.Controls
 				{
 					// add it to the current path
 					currentPath.Path.AddLineTo (touchLocation);
-					currentPath.GetPoints ().Add (touchLocation);
 				}
 
 				// obtain the smoothed path, and add it to the old paths
 				var smoothed = PathSmoothing.SmoothedPathWithGranularity (currentPath, 4);
 				paths.Add (smoothed);
+
+				currentPath.GetPoints ().Add (new InkPoint (
+					touchLocation,
+					(float)touch.Force,
+					null,
+					TimeSpan.FromSeconds (touch.Timestamp)));
 			}
 
 			// clear the current path

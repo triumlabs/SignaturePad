@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Linq;
 using Xamarin.Forms;
@@ -69,24 +69,26 @@ namespace SignaturePad.Forms
 			if (e.OldElement != null)
 			{
 				// Unsubscribe from event handlers and cleanup any resources
+				e.OldElement.SignatureRequested -= OnSignatureRequested;
 				e.OldElement.ImageStreamRequested -= OnImageStreamRequested;
 				e.OldElement.IsBlankRequested -= OnIsBlankRequested;
-				e.OldElement.PointsRequested -= OnPointsRequested;
-				e.OldElement.PointsSpecified -= OnPointsSpecified;
-				e.OldElement.StrokesRequested -= OnStrokesRequested;
-				e.OldElement.StrokesSpecified -= OnStrokesSpecified;
+				//e.OldElement.PointsRequested -= OnPointsRequested;
+				//e.OldElement.PointsSpecified -= OnPointsSpecified;
+				//e.OldElement.StrokesRequested -= OnStrokesRequested;
+				//e.OldElement.StrokesSpecified -= OnStrokesSpecified;
 				e.OldElement.ClearRequested -= OnClearRequested;
 			}
 
 			if (e.NewElement != null)
 			{
 				// Configure the control and subscribe to event handlers
+				e.NewElement.SignatureRequested += OnSignatureRequested;
 				e.NewElement.ImageStreamRequested += OnImageStreamRequested;
 				e.NewElement.IsBlankRequested += OnIsBlankRequested;
-				e.NewElement.PointsRequested += OnPointsRequested;
-				e.NewElement.PointsSpecified += OnPointsSpecified;
-				e.NewElement.StrokesRequested += OnStrokesRequested;
-				e.NewElement.StrokesSpecified += OnStrokesSpecified;
+				//e.NewElement.PointsRequested += OnPointsRequested;
+				//e.NewElement.PointsSpecified += OnPointsSpecified;
+				//e.NewElement.StrokesRequested += OnStrokesRequested;
+				//e.NewElement.StrokesSpecified += OnStrokesSpecified;
 				e.NewElement.ClearRequested += OnClearRequested;
 
 				UpdateAll ();
@@ -108,6 +110,25 @@ namespace SignaturePad.Forms
 		private void OnCleared (object sender, EventArgs e)
 		{
 			Element?.OnCleared ();
+		}
+
+		private void OnSignatureRequested (object sender, SignaturePadCanvasView.SignatureRequestedEventArgs e)
+		{
+			var xcSignature = Control.GetSignature ();
+			e.Signature = new Signature(
+				(Signature.SignatureFeatures)xcSignature.Features,
+				new Signature.SignatureFrame(xcSignature.Frame.Width, xcSignature.Frame.Height),
+				xcSignature.Points
+					?.Select (xcStroke => xcStroke
+						.Select(xcPoint => 
+							new Signature.SignaturePoint(
+								new Signature.SignaturePointPosition(xcPoint.Position.X, xcPoint.Position.Y),
+								xcPoint.Pressure,
+								xcPoint.TiltOrieantation != null ? new Signature.SignatureTiltOrieantation(xcPoint.TiltOrieantation.X, xcPoint.TiltOrieantation.Y) : null,
+								xcPoint.Timestamp))
+						.ToList())
+					.ToList (),
+				xcSignature.Timestamp);
 		}
 
 		private void OnImageStreamRequested (object sender, SignaturePadCanvasView.ImageStreamRequestedEventArgs e)
@@ -148,41 +169,41 @@ namespace SignaturePad.Forms
 			}
 		}
 
-		private void OnPointsRequested (object sender, SignaturePadCanvasView.PointsEventArgs e)
-		{
-			var ctrl = Control;
-			if (ctrl != null)
-			{
-				e.Points = ctrl.Points.Select (p => new Point (p.X, p.Y));
-			}
-		}
+		//private void OnPointsRequested (object sender, SignaturePadCanvasView.PointsEventArgs e)
+		//{
+		//	var ctrl = Control;
+		//	if (ctrl != null)
+		//	{
+		//		e.Points = ctrl.Points.Select (p => new Point (p.X, p.Y));
+		//	}
+		//}
 
-		private void OnPointsSpecified (object sender, SignaturePadCanvasView.PointsEventArgs e)
-		{
-			var ctrl = Control;
-			if (ctrl != null)
-			{
-				ctrl.LoadPoints (e.Points.Select (p => new NativePoint ((float)p.X, (float)p.Y)).ToArray ());
-			}
-		}
+		//private void OnPointsSpecified (object sender, SignaturePadCanvasView.PointsEventArgs e)
+		//{
+		//	var ctrl = Control;
+		//	if (ctrl != null)
+		//	{
+		//		ctrl.LoadPoints (e.Points.Select (p => new NativePoint ((float)p.X, (float)p.Y)).ToArray ());
+		//	}
+		//}
 
-		private void OnStrokesRequested (object sender, SignaturePadCanvasView.StrokesEventArgs e)
-		{
-			var ctrl = Control;
-			if (ctrl != null)
-			{
-				e.Strokes = ctrl.Strokes.Select (s => s.Select (p => new Point (p.X, p.Y)));
-			}
-		}
+		//private void OnStrokesRequested (object sender, SignaturePadCanvasView.StrokesEventArgs e)
+		//{
+		//	var ctrl = Control;
+		//	if (ctrl != null)
+		//	{
+		//		e.Strokes = ctrl.Strokes.Select (s => s.Select (p => new Point (p.X, p.Y)));
+		//	}
+		//}
 
-		private void OnStrokesSpecified (object sender, SignaturePadCanvasView.StrokesEventArgs e)
-		{
-			var ctrl = Control;
-			if (ctrl != null)
-			{
-				ctrl.LoadStrokes (e.Strokes.Select (s => s.Select (p => new NativePoint ((float)p.X, (float)p.Y)).ToArray ()).ToArray ());
-			}
-		}
+		//private void OnStrokesSpecified (object sender, SignaturePadCanvasView.StrokesEventArgs e)
+		//{
+		//	var ctrl = Control;
+		//	if (ctrl != null)
+		//	{
+		//		ctrl.LoadStrokes (e.Strokes.Select (s => s.Select (p => new NativePoint ((float)p.X, (float)p.Y)).ToArray ()).ToArray ());
+		//	}
+		//}
 
 		private void OnClearRequested (object sender, EventArgs e)
 		{

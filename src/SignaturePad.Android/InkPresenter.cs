@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using Android.App;
@@ -56,11 +57,16 @@ namespace Xamarin.Controls
 
 		private void TouchesBegan (MotionEvent e)
 		{
+			if (paths.Count == 0)
+			{
+				StrokesRecordedAt = DateTime.UtcNow;
+			}
+
 			// don't allow the event to propagate because we're handling it here
 			Parent?.RequestDisallowInterceptTouchEvent (true);
 
 			// create a new path and set the options
-			currentPath = new InkStroke (new Path (), new List<System.Drawing.PointF> (), StrokeColor, StrokeWidth);
+			currentPath = new InkStroke (new Path (), new List<InkPoint> (), StrokeColor, StrokeWidth);
 
 			// obtain the location of the touch
 			float touchX = e.GetX ();
@@ -68,7 +74,11 @@ namespace Xamarin.Controls
 
 			// move to the touched point
 			currentPath.Path.MoveTo (touchX, touchY);
-			currentPath.GetPoints ().Add (new System.Drawing.PointF (touchX, touchY));
+			currentPath.GetPoints ().Add (new InkPoint(
+				new System.Drawing.PointF (touchX, touchY),
+				e.Pressure,
+				null,
+				TimeSpan.FromMilliseconds (e.EventTime)));
 
 			// update the dirty rectangle
 			ResetBounds (touchX, touchY);
@@ -98,8 +108,13 @@ namespace Xamarin.Controls
 
 					// add it to the current path
 					currentPath.Path.LineTo (historicalX, historicalY);
-					currentPath.GetPoints ().Add (new System.Drawing.PointF (historicalX, historicalY));
 				}
+
+				currentPath.GetPoints ().Add (new InkPoint (
+					new System.Drawing.PointF (historicalX, historicalY),
+					e.GetHistoricalPressure (i),
+					null,
+					TimeSpan.FromMilliseconds (e.GetHistoricalEventTime (i))));
 			}
 
 			float touchX = e.GetX ();
@@ -109,12 +124,17 @@ namespace Xamarin.Controls
 			{
 				// add it to the current path
 				currentPath.Path.LineTo (touchX, touchY);
-				currentPath.GetPoints ().Add (new System.Drawing.PointF (touchX, touchY));
 
 				// update the dirty rectangle
 				UpdateBounds (touchX, touchY);
 				hasMoved = true;
 			}
+
+			currentPath.GetPoints ().Add (new InkPoint (
+				new System.Drawing.PointF (touchX, touchY),
+				e.Pressure,
+				null,
+				TimeSpan.FromMilliseconds (e.EventTime)));
 
 			if (update && hasMoved)
 			{

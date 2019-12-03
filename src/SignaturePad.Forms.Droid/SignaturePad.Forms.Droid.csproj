@@ -30,6 +30,10 @@
     <PackageTags>xamarin,signature,handwriting,windows,ios,android,uwp</PackageTags>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);XFORMS</DefineConstants>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="MSBuild.Sdk.Extras" Version="1.4.0" PrivateAssets="All" />
     <PackageReference Include="Xamarin.Forms" Version="2.5.0.280555" />
@@ -39,6 +43,7 @@
   <ItemGroup>
     <Compile Include="..\SignaturePad.Forms.Shared\**\*.cs" Link="%(filename).shared%(Extension)" />
     <Compile Include="..\SignaturePad.Forms.Platform.Shared\**\*.cs" Link="%(filename).platform%(Extension)" />
+    <Compile Include="..\SignaturePad.Shared\Signature.cs" Link="%(filename).shared%(Extension)" />
     <Folder Include="Resources" />
   </ItemGroup>
 

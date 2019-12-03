@@ -546,6 +546,15 @@ namespace SignaturePad.Forms
 		}
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public Signature GetSignature ()
+		{
+			return SignaturePadCanvas.GetSignature ();
+		}
+
+		/// <summary>
 		/// Create an encoded image of the currently drawn signature.
 		/// </summary>
 		public Task<Stream> GetImageStreamAsync (SignatureImageFormat format, bool shouldCrop = true, bool keepAspectRatio = true)

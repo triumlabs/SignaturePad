@@ -51,9 +51,9 @@ namespace Xamarin.Controls
 		private static readonly NativeColor SignaturePadLightColor = Windows.UI.Colors.White;
 #endif
 
-		public NativePoint[][] Strokes => SignaturePadCanvas.Strokes;
+		//public NativePoint[][] Strokes => SignaturePadCanvas.Strokes;
 
-		public NativePoint[] Points => SignaturePadCanvas.Points;
+		//public NativePoint[] Points => SignaturePadCanvas.Points;
 
 		public bool IsBlank => SignaturePadCanvas?.IsBlank ?? true;
 
@@ -68,19 +68,19 @@ namespace Xamarin.Controls
 			UpdateUi ();
 		}
 
-		public void LoadPoints (NativePoint[] points)
-		{
-			SignaturePadCanvas.LoadPoints (points);
+		//public void LoadPoints (NativePoint[] points)
+		//{
+		//	SignaturePadCanvas.LoadPoints (points);
 
-			UpdateUi ();
-		}
+		//	UpdateUi ();
+		//}
 
-		public void LoadStrokes (NativePoint[][] strokes)
-		{
-			SignaturePadCanvas.LoadStrokes (strokes);
+		//public void LoadStrokes (NativePoint[][] strokes)
+		//{
+		//	SignaturePadCanvas.LoadStrokes (strokes);
 
-			UpdateUi ();
-		}
+		//	UpdateUi ();
+		//}
 
 		/// <summary>
 		/// Create an image of the currently drawn signature.

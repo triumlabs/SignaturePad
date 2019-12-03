@@ -82,6 +82,13 @@ namespace SignaturePad.Forms
 			set => SetValue (StrokeCompletedCommandProperty, value);
 		}
 
+		public Signature GetSignature ()
+		{
+			var args = new SignatureRequestedEventArgs ();
+			SignatureRequested?.Invoke (this, args);
+			return args.Signature;
+		}
+
 		/// <summary>
 		/// Create an encoded image stream of the currently drawn signature.
 		/// </summary>
@@ -277,6 +284,7 @@ namespace SignaturePad.Forms
 		public event EventHandler StrokeCompleted;
 		public event EventHandler Cleared;
 
+		internal event EventHandler<SignatureRequestedEventArgs> SignatureRequested;
 		internal event EventHandler<ImageStreamRequestedEventArgs> ImageStreamRequested;
 		internal event EventHandler<IsBlankRequestedEventArgs> IsBlankRequested;
 		internal event EventHandler<PointsEventArgs> PointsRequested;
@@ -284,6 +292,11 @@ namespace SignaturePad.Forms
 		internal event EventHandler<StrokesEventArgs> StrokesRequested;
 		internal event EventHandler<StrokesEventArgs> StrokesSpecified;
 		internal event EventHandler<EventArgs> ClearRequested;
+
+		internal class SignatureRequestedEventArgs : EventArgs
+		{
+			public Signature Signature { get; set; }
+		}
 
 		internal class ImageStreamRequestedEventArgs : EventArgs
 		{
