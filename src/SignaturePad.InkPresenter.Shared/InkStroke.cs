@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 #if __ANDROID__
 using NativeColor = Android.Graphics.Color;
@@ -19,12 +20,14 @@ namespace Xamarin.Controls
 		private float width;
 		private IList<InkPoint> inkPoints;
 
-		public InkStroke (NativePath path, IList<InkPoint> points, NativeColor color, float width)
+		public InkStroke (NativePath path, IList<InkPoint> points, NativeColor color, float width, InkSource source, DateTime timestamp)
 		{
 			Path = path;
 			inkPoints = points;
 			Color = color;
 			Width = width;
+			Source = source;
+			Timestamp = timestamp;
 		}
 
 		public NativePath Path { get; private set; }
@@ -53,6 +56,10 @@ namespace Xamarin.Controls
 				IsDirty = true;
 			}
 		}
+
+		public InkSource Source { get; set; }
+
+		public DateTime Timestamp { get; private set; }
 
 		internal bool IsDirty { get; set; }
 	}

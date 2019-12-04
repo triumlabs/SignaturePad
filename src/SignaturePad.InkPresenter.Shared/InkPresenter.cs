@@ -50,8 +50,6 @@ namespace Xamarin.Controls
 
 		public float StrokeWidth { get; set; } = 1f;
 
-		public DateTime? StrokesRecordedAt { get; private set; }
-
 		// private properties
 
 #if __IOS__

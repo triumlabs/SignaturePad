@@ -36,13 +36,8 @@ namespace Xamarin.Controls
 
 		public override void TouchesBegan (NSSet touches, UIEvent evt)
 		{
-			if (paths.Count == 0)
-			{
-				StrokesRecordedAt = DateTime.UtcNow;
-			}
-
 			// create a new path and set the options
-			currentPath = new InkStroke (UIBezierPath.Create (), new List<InkPoint> (), StrokeColor, StrokeWidth);
+			currentPath = new InkStroke (UIBezierPath.Create (), new List<InkPoint> (), StrokeColor, StrokeWidth, InkSource.Touch, DateTime.UtcNow);
 
 			// obtain the location of the touch
 			var touch = touches.AnyObject as UITouch;

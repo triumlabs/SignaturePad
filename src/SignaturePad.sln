@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignaturePad.UWP", "Signatu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignaturePad.Forms.UWP", "SignaturePad.Forms.UWP\SignaturePad.Forms.UWP.csproj", "{6FC62387-6717-4577-A48B-D15848741F08}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignaturePad.Wpf", "SignaturePad.Wpf\SignaturePad.Wpf.csproj", "{9827CE8B-71C6-46B3-A963-7AABBC95D925}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{6FC62387-6717-4577-A48B-D15848741F08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FC62387-6717-4577-A48B-D15848741F08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FC62387-6717-4577-A48B-D15848741F08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9827CE8B-71C6-46B3-A963-7AABBC95D925}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9827CE8B-71C6-46B3-A963-7AABBC95D925}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9827CE8B-71C6-46B3-A963-7AABBC95D925}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9827CE8B-71C6-46B3-A963-7AABBC95D925}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

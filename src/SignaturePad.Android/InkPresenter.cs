@@ -57,16 +57,11 @@ namespace Xamarin.Controls
 
 		private void TouchesBegan (MotionEvent e)
 		{
-			if (paths.Count == 0)
-			{
-				StrokesRecordedAt = DateTime.UtcNow;
-			}
-
 			// don't allow the event to propagate because we're handling it here
 			Parent?.RequestDisallowInterceptTouchEvent (true);
 
 			// create a new path and set the options
-			currentPath = new InkStroke (new Path (), new List<InkPoint> (), StrokeColor, StrokeWidth);
+			currentPath = new InkStroke (new Path (), new List<InkPoint> (), StrokeColor, StrokeWidth, InkSource.Touch, DateTime.UtcNow);
 
 			// obtain the location of the touch
 			float touchX = e.GetX ();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 
 #if XFORMS
@@ -9,25 +10,34 @@ namespace SignaturePad.Forms
 namespace Xamarin.Controls
 #endif
 {
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <remarks>DebuggerDiaply: https://blogs.msdn.microsoft.com/jaredpar/2011/03/18/debuggerdisplay-attribute-best-practices/</remarks>
+	[DebuggerDisplay ("{DebuggerDisplay,nq}")]
 	public sealed class Signature
 	{
+		private string DebuggerDisplay => $"Strokes = {Strokes.Count} @ {Timestamp}";
 		private static readonly IReadOnlyList<IReadOnlyList<SignaturePoint>> EmptyPoints = new ReadOnlyCollection<IReadOnlyList<SignaturePoint>> (new SignaturePoint[0][]);
 
 		public SignatureFeatures Features { get; private set; }
 
 		public SignatureFrame Frame { get; private set; }
 
-		public IReadOnlyList<IReadOnlyList<SignaturePoint>> Points { get; private set; }
+		public IReadOnlyList<SignatureStroke> Strokes { get; private set; }
 
 		public DateTime Timestamp { get; private set; }
 
-		public Signature (SignatureFeatures features, SignatureFrame frame, IEnumerable<IEnumerable<SignaturePoint>> points, DateTime timestamp)
+		public IList<SignaturePoint> GetPoints()
+		{
+			return Strokes.SelectMany (stroke => stroke.Points).ToList ();
+		}
+
+		public Signature (SignatureFeatures features, SignatureFrame frame, IEnumerable<SignatureStroke> strokes, DateTime timestamp)
 		{
 			Features = features;
 			Frame = frame;
-			Points = new ReadOnlyCollection<IReadOnlyList<SignaturePoint>>(points
-				?.Select (stroke => (IReadOnlyList<SignaturePoint>)new ReadOnlyCollection<SignaturePoint> (stroke.ToList ()))
-				.ToList ());
+			Strokes = new ReadOnlyCollection<SignatureStroke> (strokes.ToList ());
 			Timestamp = timestamp;
 		}
 
@@ -43,8 +53,11 @@ namespace Xamarin.Controls
 			Pressure = 1 << 3,
 		}
 
+		[DebuggerDisplay ("{DebuggerDisplay,nq}")]
 		public sealed class SignatureFrame
 		{
+			private string DebuggerDisplay => $"{Width} x {Height}";
+
 			public float Width { get; private set; }
 
 			public float Height { get; private set; }
@@ -56,8 +69,38 @@ namespace Xamarin.Controls
 			}
 		}
 
+		[DebuggerDisplay ("{DebuggerDisplay,nq}")]
+		public sealed class SignatureStroke
+		{
+			private string DebuggerDisplay => $"Count = {Points.Count} @ {Timestamp}";
+
+			public SignatureStrokeSource Source { get; private set; }
+
+			public IReadOnlyList<SignaturePoint> Points { get; private set; }
+
+			public DateTime Timestamp { get; private set; }
+
+			public SignatureStroke (SignatureStrokeSource source, IEnumerable<SignaturePoint> points, DateTime timestamp)
+			{
+				Source = source;
+				Points = new ReadOnlyCollection<SignaturePoint> (points.ToList());
+				Timestamp = timestamp;
+			}
+		}
+
+		public enum SignatureStrokeSource
+		{
+			Undefined = 0,
+			Mouse,
+			Touch,
+			Stylus,
+		}
+
+		[DebuggerDisplay ("{DebuggerDisplay,nq}")]
 		public sealed class SignaturePoint
 		{
+			private string DebuggerDisplay => $"{Position.X} x {Position.Y} x {Pressure} @ {Timestamp.Ticks}";
+
 			public SignaturePointPosition Position { get; private set; }
 
 			public float Pressure { get; private set; }
@@ -75,8 +118,11 @@ namespace Xamarin.Controls
 			}
 		}
 
+		[DebuggerDisplay ("{DebuggerDisplay,nq}")]
 		public sealed class SignaturePointPosition
 		{
+			private string DebuggerDisplay => $"{X} x {Y}";
+
 			public float X { get; private set; }
 
 			public float Y { get; private set; }
@@ -88,8 +134,11 @@ namespace Xamarin.Controls
 			}
 		}
 
+		[DebuggerDisplay ("{DebuggerDisplay,nq}")]
 		public sealed class SignatureTiltOrieantation
 		{
+			private string DebuggerDisplay => $"{X} x {Y}";
+
 			public float X { get; private set; }
 
 			public float Y { get; private set; }

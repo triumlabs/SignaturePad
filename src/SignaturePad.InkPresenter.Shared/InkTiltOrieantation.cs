@@ -2,9 +2,11 @@
 
 namespace Xamarin.Controls
 {
-	[DebuggerDisplay ("{X} x {Y}")]
+	[DebuggerDisplay ("{DebuggerDisplay,nq}")]
 	public sealed class InkTiltOrieantation
 	{
+		private string DebuggerDisplay => $"{X} x {Y}";
+
 		public float X { get; private set; }
 
 		public float Y { get; private set; }

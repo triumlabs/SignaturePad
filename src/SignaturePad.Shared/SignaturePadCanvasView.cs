@@ -48,13 +48,13 @@ namespace Xamarin.Controls
 
 		public Signature GetSignature ()
 		{
-			if (inkPresenter.StrokesRecordedAt == null)
+			var points = inkPresenter.GetStrokes ().SelectMany (stroke => stroke.GetPoints ()).ToList ();
+			if (points.Count == 0)
 			{
 				return null;
 			}
 
 			var features = Signature.SignatureFeatures.None;
-			var points = inkPresenter.GetStrokes ().SelectMany (stroke => stroke.GetPoints ()).ToList ();
 			if (points.Min (point => point.Pressure) != points.Max (point => point.Pressure))
 			{
 				features |= Signature.SignatureFeatures.Pressure;
@@ -76,23 +76,22 @@ namespace Xamarin.Controls
 				new Signature.SignatureFrame ((float)Frame.Width, (float)Frame.Height),
 #endif
 				inkPresenter.GetStrokes ()
-					?.Select (stroke =>
+					?.Select (inkStroke =>
 						{
-							var tsOrigin = stroke.GetPoints ().Count > 0 ? stroke.GetPoints ()[0].Timestamp : TimeSpan.Zero;
-							return stroke.GetPoints ()
-								.Select (inkPoint => new Signature.SignaturePoint (
-#if WINDOWS_PHONE_APP
-									new Signature.SignaturePointPosition(inkPoint.Position.X, inkPoint.Position.Y),
-#else
-									new Signature.SignaturePointPosition ((float)inkPoint.Position.X, (float)inkPoint.Position.Y),
-#endif
-									inkPoint.Pressure,
-									inkPoint.TiltOrieantation != null ? new Signature.SignatureTiltOrieantation (inkPoint.TiltOrieantation.X, inkPoint.TiltOrieantation.Y) : null,
-									inkPoint.Timestamp - tsOrigin))
-								.ToList();
+							var tsOrigin = inkStroke.GetPoints ().Count > 0 ? inkStroke.GetPoints ()[0].Timestamp : TimeSpan.Zero;
+							var stroke = new Signature.SignatureStroke (
+								Signature.SignatureStrokeSource.Touch,
+								inkStroke.GetPoints ()
+									.Select (inkPoint => new Signature.SignaturePoint (
+										new Signature.SignaturePointPosition ((float)inkPoint.Position.X, (float)inkPoint.Position.Y),
+										inkPoint.Pressure,
+										inkPoint.TiltOrieantation != null ? new Signature.SignatureTiltOrieantation (inkPoint.TiltOrieantation.X, inkPoint.TiltOrieantation.Y) : null,
+										inkPoint.Timestamp - tsOrigin)),
+								inkStroke.Timestamp);
+							return stroke;
 						})
 					.ToList (),
-				inkPresenter.StrokesRecordedAt.Value);
+				inkPresenter.GetStrokes()[0].Timestamp);
 
 			return signature;
 		}

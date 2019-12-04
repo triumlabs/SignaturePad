@@ -118,16 +118,17 @@ namespace SignaturePad.Forms
 			e.Signature = new Signature(
 				(Signature.SignatureFeatures)xcSignature.Features,
 				new Signature.SignatureFrame(xcSignature.Frame.Width, xcSignature.Frame.Height),
-				xcSignature.Points
-					?.Select (xcStroke => xcStroke
-						.Select(xcPoint => 
-							new Signature.SignaturePoint(
-								new Signature.SignaturePointPosition(xcPoint.Position.X, xcPoint.Position.Y),
-								xcPoint.Pressure,
-								xcPoint.TiltOrieantation != null ? new Signature.SignatureTiltOrieantation(xcPoint.TiltOrieantation.X, xcPoint.TiltOrieantation.Y) : null,
-								xcPoint.Timestamp))
-						.ToList())
-					.ToList (),
+				xcSignature.Strokes
+					?.Select (xcStroke => new Signature.SignatureStroke(
+						Signature.SignatureStrokeSource.Touch,
+						xcStroke.Points
+							.Select(xcPoint => 
+								new Signature.SignaturePoint(
+									new Signature.SignaturePointPosition(xcPoint.Position.X, xcPoint.Position.Y),
+									xcPoint.Pressure,
+									xcPoint.TiltOrieantation != null ? new Signature.SignatureTiltOrieantation(xcPoint.TiltOrieantation.X, xcPoint.TiltOrieantation.Y) : null,
+									xcPoint.Timestamp)),
+						xcStroke.Timestamp)),
 				xcSignature.Timestamp);
 		}
 
