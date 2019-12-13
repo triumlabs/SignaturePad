@@ -14,7 +14,8 @@
                             BorderThickness="{TemplateBinding BorderThickness}">
                         <InkCanvas Name="SignaturePadCanvas"
                                    HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Stretch">
+                                   VerticalAlignment="Stretch"
+                                   Background="{TemplateBinding Background}">
                         </InkCanvas>
                     </Border>
                 </ControlTemplate>
