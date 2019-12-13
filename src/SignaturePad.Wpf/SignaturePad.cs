@@ -64,11 +64,11 @@ namespace Xamarin.Controls
 			{
 				features |= Signature.SignatureFeatures.Pressure;
 			}
-			if (points.Min (point => point.TiltOrieantation?.X ?? 0) != points.Max (point => point.TiltOrieantation?.X))
+			if (points.Min (point => point.TiltOrieantation?.X ?? 0) != points.Max (point => point.TiltOrieantation?.X ?? 0))
 			{
 				features |= Signature.SignatureFeatures.TiltOrientationX;
 			}
-			if (points.Min (point => point.TiltOrieantation?.Y ?? 0) != points.Max (point => point.TiltOrieantation?.Y))
+			if (points.Min (point => point.TiltOrieantation?.Y ?? 0) != points.Max (point => point.TiltOrieantation?.Y ?? 0))
 			{
 				features |= Signature.SignatureFeatures.TiltOrientationY;
 			}
@@ -84,8 +84,8 @@ namespace Xamarin.Controls
 								(Signature.SignatureStrokeSource)inkStroke.Source,
 								inkStroke.Points
 									.Select (inkPoint => new Signature.SignaturePoint (
-											new Signature.SignaturePointPosition ((float)inkPoint.Position.X, (float)inkPoint.Position.Y),
-											inkPoint.Pressure,
+										new Signature.SignaturePointPosition ((float)inkPoint.Position.X, (float)inkPoint.Position.Y),
+										inkPoint.Pressure,
 										inkPoint.TiltOrieantation != null ? new Signature.SignatureTiltOrieantation (inkPoint.TiltOrieantation.X, inkPoint.TiltOrieantation.Y) : null,
 										inkPoint.Timestamp - tsOrigin)),
 								inkStroke.Timestamp);
@@ -231,7 +231,7 @@ namespace Xamarin.Controls
 
 		private static TimeSpan GetCurrentTimestamp()
 		{
-			return TimeSpan.FromTicks(DateTime.UtcNow.Ticks);
+			return TimeSpan.FromTicks(Stopwatch.GetTimestamp());
 		}
 
 		private static void DebugInkPoint(string source, int index, InkPoint point)
