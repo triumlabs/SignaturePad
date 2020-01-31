@@ -13,6 +13,10 @@ namespace Xamarin.Controls
 	[TemplatePart (Name = PartSignaturePadCanvas, Type = typeof (InkCanvas))]
 	public partial class SignaturePad : Control
 	{
+		public delegate void OnSignaturePadBorderTouch();
+
+		public delegate void OnSignatureRecordingStarted();
+
 		private const string PartSignaturePadCanvas = "SignaturePadCanvas";
 
 		#region DependencyProperties
@@ -45,6 +49,9 @@ namespace Xamarin.Controls
 		private InkStroke strokeStylus;
 		private InkStroke strokeMouse;
 		private InkCanvas canvasSignaturePad;
+		public OnSignaturePadBorderTouch BorderTouch { get; set; }
+		public OnSignatureRecordingStarted RecordingStarted { get; set; }
+		private bool borderTouch = false;
 
 		public SignaturePad ()
 		{
@@ -119,6 +126,9 @@ namespace Xamarin.Controls
 			canvasSignaturePad.PreviewMouseDown += HandleEventSignaturePadCanvasPreviewMouseDown;
 			canvasSignaturePad.PreviewMouseMove += HandleEventSignaturePadCanvasPreviewMouseMove;
 			canvasSignaturePad.PreviewMouseUp += HandleEventSignaturePadCanvasPreviewMouseUp;
+			canvasSignaturePad.MouseDown += (sender, e) => { ReviewAllMouseEvent (); };
+			canvasSignaturePad.MouseMove += (sender, e) => { ReviewAllMouseEvent (); };
+			canvasSignaturePad.MouseUp += (sender, e) => { ReviewAllMouseEvent (); };
 		}
 
 		#endregion
@@ -148,11 +158,23 @@ namespace Xamarin.Controls
 
 			if (callerName == nameof (HandleEventSignaturePadCanvasStylusDown))
 			{
+				if (lStroke?.Count == 0)
+				{
+					RecordingStarted?.Invoke ();
+				}
+
 				strokeStylus = new InkStroke (InkSource.Stylus);
 				foreach (var sp in e.GetStylusPoints (canvasSignaturePad))
 				{
 					var ip = new InkPoint (sp.ToPoint (), sp.PressureFactor, null, GetCurrentTimestamp ());
 					DebugInkPoint (callerName, strokeStylus.Points.Count, ip);
+
+					if (ip.Position.X < 0 || ip.Position.X > Width || ip.Position.Y < 0 || ip.Position.Y > Height)
+					{
+						BorderTouch?.Invoke();
+						return;
+					}
+
 					strokeStylus.Points.Add (ip);
 				}
 			}
@@ -170,6 +192,13 @@ namespace Xamarin.Controls
 						var tsPointApprox = TimeSpan.FromTicks ((tsNow.Ticks - tsLast.Ticks) * (idxSp + 1) / sps.Count + tsLast.Ticks);
 						var ip = new InkPoint (sp.ToPoint (), sp.PressureFactor, null, tsPointApprox);
 						DebugInkPoint (callerName, strokeStylus.Points.Count, ip);
+
+						if (ip.Position.X < 0 || ip.Position.X > Width || ip.Position.Y < 0 || ip.Position.Y > Height)
+						{
+							BorderTouch?.Invoke();
+							return;
+						}
+
 						strokeStylus.Points.Add (ip);
 					}
 
@@ -178,6 +207,13 @@ namespace Xamarin.Controls
 				{
 					var ip = new InkPoint (sps[0].ToPoint (), sps[0].PressureFactor, null, tsNow);
 					DebugInkPoint (callerName, strokeStylus.Points.Count, ip);
+
+					if (ip.Position.X < 0 || ip.Position.X > Width || ip.Position.Y < 0 || ip.Position.Y > Height)
+					{
+						BorderTouch?.Invoke();
+						return;
+					}
+
 					strokeStylus.Points.Add (ip);
 				}
 
@@ -217,6 +253,18 @@ namespace Xamarin.Controls
 			var point = e.GetPosition (canvasSignaturePad);
 			var ip = new InkPoint (point, 0f, null, GetCurrentTimestamp ());
 			DebugInkPoint (callerName, strokeMouse.Points.Count, ip);
+
+			if (ip.Position.X < 0 || ip.Position.X > Width || ip.Position.Y < 0 || ip.Position.Y > Height)
+			{
+				borderTouch = true;
+				return;
+			}
+
+			if (lStroke?.Count == 0 && strokeMouse?.Points.Count == 0)
+			{
+				RecordingStarted?.Invoke();
+			}
+
 			strokeMouse.Points.Add (ip);
 
 			if (callerName == nameof(HandleEventSignaturePadCanvasPreviewMouseUp))
@@ -224,6 +272,15 @@ namespace Xamarin.Controls
 				DebugMessage ($"StrokeCaptured: #{lStroke.Count} Src = {strokeMouse.Source}, Count = {strokeMouse.Points.Count} @ {strokeMouse.Timestamp}");
 				lStroke.Add (strokeMouse);
 				strokeMouse = null;
+			}
+		}
+
+		private void ReviewAllMouseEvent ()
+		{
+			if (borderTouch)
+			{
+				BorderTouch?.Invoke ();
+				borderTouch = false;
 			}
 		}
 
