@@ -127,7 +127,7 @@ namespace Xamarin.Controls
 			canvasSignaturePad.PreviewMouseMove += HandleEventSignaturePadCanvasPreviewMouseMove;
 			canvasSignaturePad.PreviewMouseUp += HandleEventSignaturePadCanvasPreviewMouseUp;
 			canvasSignaturePad.MouseDown += (sender, e) => { ReviewAllMouseEvent (); };
-			canvasSignaturePad.MouseMove += (sender, e) => { ReviewAllMouseEvent (); };
+			//canvasSignaturePad.MouseMove += (sender, e) => { ReviewAllMouseEvent (); };
 			canvasSignaturePad.MouseUp += (sender, e) => { ReviewAllMouseEvent (); };
 		}
 
