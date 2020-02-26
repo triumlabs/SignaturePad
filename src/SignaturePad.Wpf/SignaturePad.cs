@@ -119,33 +119,36 @@ namespace Xamarin.Controls
 			canvasSignaturePad.DefaultDrawingAttributes.Color = StrokeColor;
 			canvasSignaturePad.DefaultDrawingAttributes.Width = StrokeWidth;
 
-			canvasSignaturePad.StylusDown += HandleEventSignaturePadCanvasStylusDown;
-			canvasSignaturePad.StylusMove += HandleEventSignaturePadCanvasStylusMove;
-			canvasSignaturePad.StylusUp += HandleEventSignaturePadCanvasStylusUp;
+			canvasSignaturePad.PreviewStylusDown += HandleEventSignaturePadCanvasPreviewStylusDown;
+			canvasSignaturePad.PreviewStylusMove += HandleEventSignaturePadCanvasPreviewStylusMove;
+			canvasSignaturePad.PreviewStylusUp += HandleEventSignaturePadCanvasPreviewStylusUp;
+			canvasSignaturePad.StylusDown += (sender, e) => { ReviewAllEvent (); };
+			//canvasSignaturePad.StylusMove += HandleEventSignaturePadCanvasStylusMove;
+			canvasSignaturePad.StylusUp += (sender, e) => { ReviewAllEvent (); };
 
 			canvasSignaturePad.PreviewMouseDown += HandleEventSignaturePadCanvasPreviewMouseDown;
 			canvasSignaturePad.PreviewMouseMove += HandleEventSignaturePadCanvasPreviewMouseMove;
 			canvasSignaturePad.PreviewMouseUp += HandleEventSignaturePadCanvasPreviewMouseUp;
-			canvasSignaturePad.MouseDown += (sender, e) => { ReviewAllMouseEvent (); };
+			canvasSignaturePad.MouseDown += (sender, e) => { ReviewAllEvent (); };
 			//canvasSignaturePad.MouseMove += (sender, e) => { ReviewAllMouseEvent (); };
-			canvasSignaturePad.MouseUp += (sender, e) => { ReviewAllMouseEvent (); };
+			canvasSignaturePad.MouseUp += (sender, e) => { ReviewAllEvent (); };
 		}
 
 		#endregion
 
 		#region Event handlers
 
-		private void HandleEventSignaturePadCanvasStylusDown (object sender, StylusEventArgs e)
+		private void HandleEventSignaturePadCanvasPreviewStylusDown (object sender, StylusEventArgs e)
 		{
 			ProcessStylusEvent (e);
 		}
 
-		private void HandleEventSignaturePadCanvasStylusMove (object sender, StylusEventArgs e)
+		private void HandleEventSignaturePadCanvasPreviewStylusMove (object sender, StylusEventArgs e)
 		{
 			ProcessStylusEvent (e);
 		}
 
-		private void HandleEventSignaturePadCanvasStylusUp (object sender, StylusEventArgs e)
+		private void HandleEventSignaturePadCanvasPreviewStylusUp (object sender, StylusEventArgs e)
 		{
 			ProcessStylusEvent (e);
 		}
@@ -156,7 +159,7 @@ namespace Xamarin.Controls
 
 			if (strokeMouse != null) return;
 
-			if (callerName == nameof (HandleEventSignaturePadCanvasStylusDown))
+			if (callerName == nameof (HandleEventSignaturePadCanvasPreviewStylusDown))
 			{
 				if (lStroke?.Count == 0)
 				{
@@ -171,7 +174,7 @@ namespace Xamarin.Controls
 
 					if (ip.Position.X < 0 || ip.Position.X > Width || ip.Position.Y < 0 || ip.Position.Y > Height)
 					{
-						BorderTouch?.Invoke();
+						borderTouch = true;
 						return;
 					}
 
@@ -195,7 +198,7 @@ namespace Xamarin.Controls
 
 						if (ip.Position.X < 0 || ip.Position.X > Width || ip.Position.Y < 0 || ip.Position.Y > Height)
 						{
-							BorderTouch?.Invoke();
+							borderTouch = true;
 							return;
 						}
 
@@ -217,7 +220,7 @@ namespace Xamarin.Controls
 					strokeStylus.Points.Add (ip);
 				}
 
-				if (callerName == nameof (HandleEventSignaturePadCanvasStylusUp))
+				if (callerName == nameof (HandleEventSignaturePadCanvasPreviewStylusUp))
 				{
 					DebugMessage ($"StrokeCaptured: #{lStroke.Count} Src = {strokeStylus.Source}, Count = {strokeStylus.Points.Count} @ {strokeStylus.Timestamp}");
 					lStroke.Add (strokeStylus);
@@ -275,7 +278,7 @@ namespace Xamarin.Controls
 			}
 		}
 
-		private void ReviewAllMouseEvent ()
+		private void ReviewAllEvent ()
 		{
 			if (borderTouch)
 			{
