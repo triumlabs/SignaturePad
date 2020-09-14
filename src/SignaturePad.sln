@@ -13,10 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignaturePad.Forms.Droid", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignaturePad.Forms.iOS", "SignaturePad.Forms.iOS\SignaturePad.Forms.iOS.csproj", "{B12D20AA-0EDF-4903-B385-BB8090848532}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignaturePad.UWP", "SignaturePad.UWP\SignaturePad.UWP.csproj", "{16131FDC-D50B-4EF2-8ECC-661184FF80DB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignaturePad.Forms.UWP", "SignaturePad.Forms.UWP\SignaturePad.Forms.UWP.csproj", "{6FC62387-6717-4577-A48B-D15848741F08}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignaturePad.Wpf", "SignaturePad.Wpf\SignaturePad.Wpf.csproj", "{9827CE8B-71C6-46B3-A963-7AABBC95D925}"
 EndProject
 Global
@@ -45,14 +41,6 @@ Global
 		{B12D20AA-0EDF-4903-B385-BB8090848532}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B12D20AA-0EDF-4903-B385-BB8090848532}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B12D20AA-0EDF-4903-B385-BB8090848532}.Release|Any CPU.Build.0 = Release|Any CPU
-		{16131FDC-D50B-4EF2-8ECC-661184FF80DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{16131FDC-D50B-4EF2-8ECC-661184FF80DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{16131FDC-D50B-4EF2-8ECC-661184FF80DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{16131FDC-D50B-4EF2-8ECC-661184FF80DB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6FC62387-6717-4577-A48B-D15848741F08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6FC62387-6717-4577-A48B-D15848741F08}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6FC62387-6717-4577-A48B-D15848741F08}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6FC62387-6717-4577-A48B-D15848741F08}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9827CE8B-71C6-46B3-A963-7AABBC95D925}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9827CE8B-71C6-46B3-A963-7AABBC95D925}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9827CE8B-71C6-46B3-A963-7AABBC95D925}.Release|Any CPU.ActiveCfg = Release|Any CPU
