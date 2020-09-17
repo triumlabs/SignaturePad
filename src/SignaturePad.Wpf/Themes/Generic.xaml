@@ -13,6 +13,8 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">
                         <InkCanvas Name="SignaturePadCanvas"
+                                   EditingMode="Ink"
+                                   EditingModeInverted="Ink"
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Stretch"
                                    Background="{TemplateBinding Background}">
